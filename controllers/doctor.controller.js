@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 // import cloudinary from "../upload/cloudinaryConfig.js";
 import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv'
+import Appointment from "../models/appointment.model.js";
 
 dotenv.config();
 
@@ -188,15 +189,15 @@ const uploadToCloudinary = async (fileBuffer) => {
 
 export const createDoctor = async (req, res) => {
     try {
-        const { name, email, fees, password, confirmPassword, departmentName, role } = req.body;
+        const { name, email, fees, password, departmentName, role } = req.body;
 
-        if (!name || !email || !departmentName || !fees || !password || !confirmPassword || !role) {
+        if (!name || !email || !departmentName || !fees || !password || !role) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
-        if (password !== confirmPassword) {
-            return res.status(400).json({ message: 'Passwords do not match' });
-        }
+        // if (password !== confirmPassword) {
+        //     return res.status(400).json({ message: 'Passwords do not match' });
+        // }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -473,5 +474,94 @@ export const updateDoctor = async (req, res) => {
     } catch (error) {
         console.error('Error updating doctor:', error);
         res.status(400).json({ message: error.message });
+    }
+};
+
+
+// Get all appointments related to a specific doctor
+
+// export const getDoctorAppointments = async (req, res) => {
+//     try {
+//         const doctorId = req.params.id;
+//         console.log(req.params)
+
+//         const doctor = await Doctor.findById(doctorId);
+//         if (!doctor) {
+//             return res.status(404).json({ message: 'Doctor not found' })
+//                 .populate({
+//                     path: 'appointments',
+//                     populate: { path: 'patient', select: 'name email' }  // Populating patient details within appointments if necessary
+//                 })
+//                 .populate('departmentId', 'name')
+
+
+//         }
+
+
+//         res.status(200).json(doctor);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: error.message });
+//     }
+// };
+
+// export const getDoctorAppointments = async (req, res) => {
+//     try {
+//         const doctorId = req.params.id;
+
+//         const doctor = await Doctor.findById(doctorId)
+//             .populate({
+//                 path: 'appointments',
+//                 populate: {
+//                     path: 'patient',
+//                     select: 'name email'
+//                 }
+//             })
+//             .populate('departmentId', 'name');
+
+//         if (!doctor) {
+//             return res.status(404).json({ message: 'Doctor not found' });
+//         }
+
+//         res.status(200).json(doctor);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: error.message });
+//     }
+// };
+
+
+
+export const getDoctorAppointments = async (req, res) => {
+    try {
+        // Extract the JWT token from the Authorization header
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const doctorId = decoded.id; // Assuming the payload contains the doctorId
+
+        // Find the doctor and populate the relevant fields
+        const doctor = await Doctor.findById(doctorId)
+            .populate({
+                path: 'appointments',
+                populate: {
+                    path: 'patient',
+                    select: 'name email' // Select specific fields from the Patient schema
+                }
+            })
+            .populate('departmentId', 'name').select('appointments'); // Only select the appointments field
+        ;  // Populate department name only
+
+        if (!doctor) {
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+
+        res.status(200).json(doctor);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
     }
 };

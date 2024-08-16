@@ -77,7 +77,7 @@ export const getMessagesForAdmin = async (req, res) => {
             return res.status(404).json({ message: 'No messages found' });
         }
 
-        res.status(200).json({ messages });
+        res.status(200).json({ success: true, messages });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });

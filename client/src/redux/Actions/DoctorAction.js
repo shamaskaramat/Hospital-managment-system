@@ -9,6 +9,9 @@ import {
     DELETE_DOCTOR_FAILURE,
     DELETE_DOCTOR_REQUEST,
     DELETE_DOCTOR_SUCCESS,
+    GET_DOCTOR_APPOINTMENTS_FAILURE,
+    GET_DOCTOR_APPOINTMENTS_REQUEST,
+    GET_DOCTOR_APPOINTMENTS_SUCCESS,
     GET_DOCTOR_LOGIN_DATA_REQUEST,
     GET_DOCTOR_LOGIN_DATA_REQUEST_ERROR,
     GET_DOCTOR_LOGIN_DATA_REQUEST_FAIL,
@@ -28,8 +31,11 @@ export const doctorLogin = (loginData, navigate) => async (dispatch) => {
         dispatch({ type: GET_DOCTOR_LOGIN_DATA_REQUEST });
 
         const response = await axios.post('http://localhost:8000/api/doctor/login', loginData);
+        // return Cookies.get('doctorAuth');
 
         if (response.data.success) {
+            Cookies.set('doctorToken', response.data.token, { expires: 7 });
+
             toast.success('Login successful!');
             dispatch({
                 type: GET_DOCTOR_LOGIN_DATA_REQUEST_SUCCESS,
@@ -118,5 +124,26 @@ export const deleteDoctor = (id) => async (dispatch) => {
     } catch (error) {
         dispatch({ type: DELETE_DOCTOR_FAILURE, payload: error.response?.data?.message || error.message });
         toast.error('Failed to delete doctor');
+    }
+};
+
+const getDoctorToken = () => {
+    return Cookies.get('doctorToken');
+};
+//GET DOCTOR APPOINTMENTS
+export const getDoctorAppointment = () => async (dispatch) => {
+    dispatch({ type: GET_DOCTOR_APPOINTMENTS_REQUEST });
+
+    try {
+        const token = getDoctorToken();
+        console.log("Token being sent:", token);
+
+        const response = await axios.get('http://localhost:8000/api/doctor/getallappointment', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log(response)
+        dispatch({ type: GET_DOCTOR_APPOINTMENTS_SUCCESS, payload: response.data.appointments });
+    } catch (error) {
+        dispatch({ type: GET_DOCTOR_APPOINTMENTS_FAILURE, payload: error.response?.data?.message || error.message });
     }
 };

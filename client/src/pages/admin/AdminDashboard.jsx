@@ -1,100 +1,81 @@
-import React from 'react'
-import { FaUserMd, FaUserInjured, FaCalendarAlt, FaUserPlus, FaEnvelope, FaSignOutAlt, FaUserMinus } from 'react-icons/fa'
-import { MdDashboard } from 'react-icons/md'
-import { Link, Outlet } from 'react-router-dom';
-import { MdOutlineSettings } from "react-icons/md";
-import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
-
-const sidebarClasses = 'bg-blue-700 text-white w-64 p-6 space-y-6'
-const linkClasses = 'flex items-center space-x-2 py-2 px-4 rounded hover:bg-blue-600 transition-colors duration-200'
-
+import React, { useState } from 'react'
+import { FaUserMd, FaUserInjured, FaCalendarAlt, FaEnvelope, FaSignOutAlt } from 'react-icons/fa'
+import { MdDashboard, MdOutlineSettings } from "react-icons/md"
+import { FaBuildingColumns } from "react-icons/fa6"
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import Cookies from 'js-cookie'
+import { toast } from 'react-toastify'
 
 const Sidebar = () => {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
+    const location = useLocation()
+    const [isExpanded, setIsExpanded] = useState(true)
+
     const handleLogout = () => {
-        Cookies.remove('authToken');
-        navigate('/admin/login');
-        toast.success('Logged out successfully!');
-    };
+        Cookies.remove('authToken')
+        navigate('/')
+        toast.success('Logged out successfully!')
+    }
+
+    const isActive = (path) => location.pathname === path
+
+    const NavLink = ({ to, icon: Icon, children }) => (
+        <Link
+            to={to}
+            className={`flex items-center py-3 px-4 rounded-lg transition-all duration-300 ${isActive(to)
+                    ? 'bg-blue-500 text-white shadow-lg'
+                    : 'text-gray-600 hover:bg-blue-100'
+                }`}
+        >
+            <Icon className={`text-xl ${isActive(to) ? 'text-white' : 'text-blue-500'}`} />
+            {isExpanded && <span className="ml-3 transition-opacity duration-300">{children}</span>}
+        </Link>
+    )
+
     return (
-        <aside className={sidebarClasses}>
-            <h1 className="text-2xl font-bold mb-8">Services Hospital</h1>
-            <nav>
-                <h4 className="text-lg font-semibold mb-4 flex items-center">
-                    <Link to="/admin" className={linkClasses}>
-
-                        <MdDashboard className="mr-2" />
-                        Dashboard
-                    </Link>
-                </h4>
-                <ul className="space-y-2">
-                    <li>
-                        <Link to="/admin/doctorlist" className={linkClasses}>
-                            <FaUserMd />
-                            <span>Doctor List</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/admin/patientlist" className={linkClasses}>
-                            <FaUserInjured />
-                            <span>Patient List</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/admin/add-doctor" className={linkClasses}>
-                            <FaUserPlus />
-                            <span>Add Doctor</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/admin/delete-doctor" className={linkClasses}>
-                            <FaUserMinus />
-                            <span>Delete Doctor</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/admin/messages" className={linkClasses}>
-                            <FaEnvelope />
-                            <span>Messages</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/admin/appointments" className={linkClasses}>
-                            <FaCalendarAlt />
-                            <span>Appointments</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/admin/departments" className={linkClasses}>
-                            <FaCalendarAlt />
-                            <span>Departments</span>
-                        </Link>
-                    </li>
-                </ul>
+        <aside className={`bg-white text-gray-800 h-screen ${isExpanded ? 'w-64' : 'w-20'
+            } transition-all duration-300 shadow-xl`}>
+            <div className="flex items-center justify-between p-4 border-b">
+                {isExpanded && <h1 className="text-xl font-bold text-blue-600">Services Hospital</h1>}
+                <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="p-2 rounded-full bg-blue-100 text-blue-500 hover:bg-blue-200 transition-colors duration-200"
+                >
+                    {isExpanded ? '←' : '→'}
+                </button>
+            </div>
+            <nav className="p-4 space-y-2">
+                <NavLink to="/admin" icon={MdDashboard}>Dashboard</NavLink>
+                <NavLink to="/admin/manage-doctors" icon={FaUserMd}>Manage Doctors</NavLink>
+                <NavLink to="/admin/patientlist" icon={FaUserInjured}>Patients</NavLink>
+                <NavLink to="/admin/messages" icon={FaEnvelope}>Messages</NavLink>
+                <NavLink to="/admin/appointments" icon={FaCalendarAlt}>Appointments</NavLink>
+                <NavLink to="/admin/departments" icon={FaBuildingColumns}>Departments</NavLink>
             </nav>
-            <div className="border-t border-white my-6 w-full"></div>
-            <button className={`${linkClasses} mt-auto`}>
-                <MdOutlineSettings />
-                <span>settings</span>
-            </button>
-            <button className={`${linkClasses} mt-auto`} onClick={handleLogout}>
-                <FaSignOutAlt />
-                <span>Logout</span>
-            </button>
-
+            <div className="absolute bottom-0 w-full p-4 border-t">
+                <button className="w-full text-left py-3 px-4 rounded-lg transition-colors duration-200 text-gray-600 hover:bg-blue-100">
+                    <MdOutlineSettings className="text-xl text-blue-500 inline" />
+                    {isExpanded && <span className="ml-3">Settings</span>}
+                </button>
+                <button
+                    className="w-full text-left py-3 px-4 rounded-lg transition-colors duration-200 text-gray-600 hover:bg-blue-100"
+                    onClick={handleLogout}
+                >
+                    <FaSignOutAlt className="text-xl text-blue-500 inline" />
+                    {isExpanded && <span className="ml-3">Logout</span>}
+                </button>
+            </div>
         </aside>
     )
 }
 
-
-
 const Dashboard = () => {
     return (
-        <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+        <div className="flex bg-gray-100 min-h-screen">
             <Sidebar />
-            <Outlet />
+            <main className="flex-grow p-8 overflow-auto">
+                <Outlet />
+            </main>
         </div>
     )
 }

@@ -108,9 +108,9 @@ export const getPatientAppointments = async (req, res) => {
 
 export const AppointmentDetails = async (req, res) => {
     try {
-        // Aggregation pipeline
+
         const appointments = await Appointment.aggregate([
-            // Join with Patient collection
+
             {
                 $lookup: {
                     from: 'patients', // The name of the Patient collection
@@ -150,22 +150,36 @@ export const AppointmentDetails = async (req, res) => {
             }
         ]);
 
-        res.status(200).json(appointments);
+        res.status(200).json({
+            success: true,
+            data: appointments
+        })
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
 
+
+
+
 export const createAppointment = async (req, res) => {
     try {
-        let { doctorId, date, time, status, departmentId } = req.body;
-        let patient = req.user._id;
+        const { doctor, date, time } = req.body;
+        const patient = req.user._id;
 
+        // Validate required fields
+        if (!doctor || !date || !time) {
+            return res.status(400).json({ message: 'Missing required fields.' });
+        }
+
+        // Validate and format the date
         const formattedDate = moment(date, 'DD-MM-YYYY', true);
         if (!formattedDate.isValid()) {
             return res.status(400).json({ message: 'Invalid date format. Use DD-MM-YYYY.' });
         }
+
+        // Validate and format the time
         const formattedTime = moment(time, 'hh:mm A', true);
         if (!formattedTime.isValid()) {
             return res.status(400).json({ message: 'Invalid time format. Use hh:mm AM/PM.' });
@@ -174,11 +188,10 @@ export const createAppointment = async (req, res) => {
         // Create new appointment
         const newAppointment = new Appointment({
             patient,
-            doctor: doctorId, // Ensure this matches the schema
+            doctor,
             date: formattedDate.toDate(),
-            time: formattedTime.format('HH:mm'),
-            status,
-            department: departmentId // Ensure this matches the schema
+            time: formattedTime.format('HH:mm'),  // Store time in 24-hour format
+            // status,
         });
 
         await newAppointment.save();
@@ -190,7 +203,7 @@ export const createAppointment = async (req, res) => {
                 { new: true }
             ),
             Doctor.findByIdAndUpdate(
-                doctorId,
+                doctor,
                 { $push: { appointments: newAppointment._id } },
                 { new: true }
             )
@@ -198,11 +211,14 @@ export const createAppointment = async (req, res) => {
 
         // Populate fields
         const populatedAppointment = await Appointment.findById(newAppointment._id)
-            .populate('doctor', 'name') // Populate doctor name
-            .populate('department', 'name') // Populate department name
+            .populate('doctor', 'name')  // Populate doctor name
             .exec();
 
-        res.status(201).json({ success: true, message: "Appointment has been created", appointment: populatedAppointment });
+        res.status(201).json({
+            success: true,
+            message: "Appointment has been created",
+            appointment: populatedAppointment
+        });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

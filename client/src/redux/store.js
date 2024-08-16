@@ -1,9 +1,23 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './Reducers/AuthReducer';
-import { PatientAuthReducer, PatientForgotPasswordReducer, PatientRegisterReducer, patientResetPasswordReducer } from './Reducers/PatientReducer';
-import { DoctorLoginReducer, doctorReducer } from "./Reducers/DoctorReducer"
+import {
+    messageReducer,
+    PatientAuthReducer,
+    PatientForgotPasswordReducer,
+    PatientRegisterReducer,
+    patientResetPasswordReducer,
+    // patientsListReducer,
+    patientsListReducer
+} from './Reducers/PatientReducer';
+import {
+    appointmentsOfDoctorReducer,
+    DoctorLoginReducer,
+    doctorReducer
+} from "./Reducers/DoctorReducer"
 import { departmentReducer } from './Reducers/DepartmentReducer';
-import { appointmentReducer } from './Reducers/AppointmentReducer';
+import { allappointmentReducer, appointmentReducer } from './Reducers/AppointmentReducer';
+import themeReducer from './Reducers/ThemeReducer';
+import { messagesListReducer } from './Reducers/AdminReducer';
 // import thunk from 'redux-thunk';
 
 export const store = configureStore({
@@ -16,7 +30,15 @@ export const store = configureStore({
         doctor: DoctorLoginReducer,
         department: departmentReducer,
         doctorstate: doctorReducer,
-        appointments: appointmentReducer
+        appointments: appointmentReducer,
+        message: messageReducer,
+        theme: themeReducer,
+        allappointments: allappointmentReducer,
+        patientsList: patientsListReducer,
+        messagesList: messagesListReducer,
+        doctorappointments: appointmentsOfDoctorReducer
+
+
     },
     // middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk),
 

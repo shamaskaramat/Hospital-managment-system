@@ -5,6 +5,9 @@ import {
     DELETE_DOCTOR_FAILURE,
     DELETE_DOCTOR_REQUEST,
     DELETE_DOCTOR_SUCCESS,
+    GET_DOCTOR_APPOINTMENTS_FAILURE,
+    GET_DOCTOR_APPOINTMENTS_REQUEST,
+    GET_DOCTOR_APPOINTMENTS_SUCCESS,
     GET_DOCTOR_LOGIN_DATA_REQUEST,
     GET_DOCTOR_LOGIN_DATA_REQUEST_ERROR,
     GET_DOCTOR_LOGIN_DATA_REQUEST_FAIL,
@@ -131,6 +134,37 @@ export const doctorReducer = (state = initialState, action) => {
         case UPDATE_DOCTOR_FAILURE:
         case DELETE_DOCTOR_FAILURE:
             return { ...state, loading: false, error: action.payload };
+        default:
+            return state;
+    }
+};
+//get  all appointment related to doctor 
+
+const initialStateappointmentbydoc = {
+    appointments: [],
+    loading: false,
+    error: null
+};
+export const appointmentsOfDoctorReducer = (state = initialStateappointmentbydoc, action) => {
+    switch (action.type) {
+        case GET_DOCTOR_APPOINTMENTS_REQUEST:
+            return {
+                ...state,
+                loading: true,
+                error: null
+            };
+        case GET_DOCTOR_APPOINTMENTS_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                appointments: action.payload
+            };
+        case GET_DOCTOR_APPOINTMENTS_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload
+            };
         default:
             return state;
     }

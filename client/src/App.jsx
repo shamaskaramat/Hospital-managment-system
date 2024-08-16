@@ -25,6 +25,7 @@ import DoctorAppointments from './pages/doctor/DoctorAppointments';
 import MainContent from './pages/admin/Main';
 import Home from './pages/Home';
 import Departments from './pages/admin/Departments';
+import PatientMessages from './pages/patient/PatientMessages';
 
 const router = createBrowserRouter([
   {
@@ -61,7 +62,7 @@ const router = createBrowserRouter([
     children: [
       { path: '', element: <MainContent /> },
       { path: 'patientlist', element: <PatientList /> },
-      { path: 'doctorlist', element: <DoctorList /> },
+      { path: 'manage-doctors', element: <DoctorList /> },
       { path: 'appointments', element: <Appointments /> },
       { path: 'add-doctor', element: <AddDoctor /> },
       { path: 'delete-doctor', element: <DeleteDoctor /> },
@@ -76,6 +77,7 @@ const router = createBrowserRouter([
       { path: '', element: <MainPatientContent /> },
       { path: 'create-appointments', element: <PatientAppointments /> },
       { path: 'appointments-history', element: <AppointmentHistory /> },
+      { path: 'messages', element: <PatientMessages /> },
     ],
   },
   {

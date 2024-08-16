@@ -16,7 +16,13 @@ import {
     RESET_PASSWORD_REQUEST,
     RESET_PASSWORD_REQUEST_SUCCESS,
     RESET_PASSWORD_REQUEST_FAIL,
-    RESET_PASSWORD_REQUEST_ERROR
+    RESET_PASSWORD_REQUEST_ERROR,
+    SEND_MESSAGE_REQUEST,
+    SEND_MESSAGE_SUCCESS,
+    SEND_MESSAGE_FAILURE,
+    GET_PATIENT_LIST_REQUEST,
+    GET_PATIENT_LIST_SUCCESS,
+    GET_PATIENT_LIST_FAILURE
 } from '../Constants/PatientConstant';
 
 const initialStateLogin = {
@@ -117,6 +123,55 @@ export const patientResetPasswordReducer = (state = initialState, action) => {
             return { ...state, loading: false, error: action.payload };
         case RESET_PASSWORD_REQUEST_ERROR:
             return { ...state, loading: false, error: action.payload };
+        default:
+            return state;
+    }
+};
+
+
+
+
+
+
+
+const initialStateMessage = {
+    loading: false,
+    message: null,
+    error: null,
+};
+
+export const messageReducer = (state = initialStateMessage, action) => {
+    switch (action.type) {
+        case SEND_MESSAGE_REQUEST:
+            return { ...state, loading: true };
+
+        case SEND_MESSAGE_SUCCESS:
+            return { ...state, loading: false, message: action.payload, error: null };
+
+        case SEND_MESSAGE_FAILURE:
+            return { ...state, loading: false, error: action.payload };
+
+        default:
+            return state;
+    }
+};
+
+//patients list
+
+const initialStatePatientList = {
+    patients: [],
+    status: 'idle',
+    error: null
+};
+// console.log(patients, 'reduver wala') 
+export const patientsListReducer = (state = initialStatePatientList, action) => {
+    switch (action.type) {
+        case GET_PATIENT_LIST_REQUEST:
+            return { ...state, status: 'loading' };
+        case GET_PATIENT_LIST_SUCCESS:
+            return { ...state, status: 'succeeded', patients: action.payload };
+        case GET_PATIENT_LIST_FAILURE:
+            return { ...state, status: 'failed', error: action.payload };
         default:
             return state;
     }

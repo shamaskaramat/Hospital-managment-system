@@ -18,7 +18,13 @@ import {
     RESET_PASSWORD_REQUEST_SUCCESS,
     RESET_PASSWORD_REQUEST,
     RESET_PASSWORD_REQUEST_FAIL,
-    RESET_PASSWORD_REQUEST_ERROR
+    RESET_PASSWORD_REQUEST_ERROR,
+    SEND_MESSAGE_REQUEST,
+    SEND_MESSAGE_SUCCESS,
+    SEND_MESSAGE_FAILURE,
+    GET_PATIENT_LIST_REQUEST,
+    GET_PATIENT_LIST_SUCCESS,
+    GET_PATIENT_LIST_FAILURE
 } from '../Constants/PatientConstant';
 // import {  } from '../Constants/AuthConstant';
 
@@ -119,7 +125,7 @@ export const resetPassword = (otp, newPassword, navigate) => async (dispatch) =>
         dispatch({ type: RESET_PASSWORD_REQUEST });
 
         const response = await axios.post('http://localhost:8000/api/patient/reset-password', { otp, newPassword });
-        console.log(response)
+        // console.log(response)
         if (response.data.success) {
             toast.success('Password has been reset successfully!');
             dispatch({
@@ -138,5 +144,52 @@ export const resetPassword = (otp, newPassword, navigate) => async (dispatch) =>
         } else {
             toast.error(error.message);
         }
+    }
+};
+
+
+
+const getAuthToken = () => Cookies.get('authToken');
+
+// Send Message
+export const sendMessage = (messageData) => async (dispatch) => {
+    dispatch({ type: SEND_MESSAGE_REQUEST });
+
+    try {
+        const token = getAuthToken();
+
+        if (!token) {
+            throw new Error('Authentication token is missing');
+        }
+
+        const response = await axios.post('http://localhost:8000/api/patient/send-message', messageData, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        dispatch({ type: SEND_MESSAGE_SUCCESS, payload: response.data });
+        toast.success('Message sent successfully!');
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || error.message || 'An unknown error occurred';
+        dispatch({ type: SEND_MESSAGE_FAILURE, payload: errorMessage });
+        toast.error(errorMessage);
+    }
+};
+
+
+//patients List
+
+
+export const fetchPatientList = () => async (dispatch) => {
+    dispatch({ type: GET_PATIENT_LIST_REQUEST });
+
+    try {
+        const token = getAuthToken();
+        const response = await axios.get('http://localhost:8000/api/patient/patients', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        dispatch({ type: GET_PATIENT_LIST_SUCCESS, payload: response.data.patients });
+    } catch (error) {
+        dispatch({ type: GET_PATIENT_LIST_FAILURE, payload: error.response?.data?.message || error.message });
+        toast.error('Failed to fetch patient list');
     }
 };

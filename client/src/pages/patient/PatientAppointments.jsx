@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-// import { createAppointment } from '../../redux/Actions/AppointmentActions';
 import { getDoctors } from '../../redux/Actions/DoctorAction';
 import { createAppointment } from '../../redux/Actions/AppointmentAction';
-import { getDepartments } from '../../redux/Actions/DepartmentAction';
+import moment from 'moment'; // Import Moment.js
 
 const sharedClasses = {
     input: 'border border-zinc-300 rounded p-2 mb-4 w-full',
@@ -12,31 +11,38 @@ const sharedClasses = {
 
 const PatientAppointments = () => {
     const dispatch = useDispatch();
-    const { loading: deptLoading, departments, error: deptError } = useSelector((state) => state.department);
     const { loading: docLoading, doctors, error: docError } = useSelector((state) => state.doctorstate);
     const { loading, error } = useSelector((state) => state.appointments);
 
-    const [department, setDepartment] = useState('');
     const [doctor, setDoctor] = useState('');
-    const [fees, setFees] = useState('');
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
     const [formErrors, setFormErrors] = useState('');
 
     useEffect(() => {
-        dispatch(getDepartments());
         dispatch(getDoctors());
     }, [dispatch]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!department || !doctor || !fees || !date || !time) {
+        if (!doctor || !date || !time) {
             setFormErrors('Please fill in all fields.');
             return;
         }
         setFormErrors('');
-        const appointmentData = { department, doctor, fees, date, time };
-        dispatch(createAppointment(appointmentData));
+
+        const formattedDate = moment(date).format('DD-MM-YYYY');
+
+        const formattedTime = moment(time, 'HH:mm').format('hh:mm A');  // Assuming time is in 24-hour format
+
+        const appointmentData = { doctor, date: formattedDate, time: formattedTime };
+        dispatch(createAppointment(appointmentData)).then(() => {
+            setDoctor('');
+            setDate('');
+            setTime('');
+        }).catch((err) => {
+            console.error('Appointment creation failed:', err);
+        });
     };
 
     return (
@@ -44,26 +50,13 @@ const PatientAppointments = () => {
             <h2 className="text-xl font-semibold mb-4">Create an Appointment</h2>
             {formErrors && <p className="text-red-500 mb-4">{formErrors}</p>}
             {error && <p className="text-red-500 mb-4">{error}</p>}
-            {deptError && <p className="text-red-500 mb-4">{deptError}</p>}
             {docError && <p className="text-red-500 mb-4">{docError}</p>}
-            {deptLoading || docLoading ? (
+            {docLoading ? (
                 <div className="flex justify-center items-center h-24">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
             ) : (
                 <form onSubmit={handleSubmit}>
-                    <label className="block mb-2">Departments:</label>
-                    <select
-                        className={sharedClasses.input}
-                        value={department}
-                        onChange={(e) => setDepartment(e.target.value)}
-                    >
-                        <option value="">Select Department</option>
-                        {departments.map(dept => (
-                            <option key={dept._id} value={dept._id}>{dept.name}</option>
-                        ))}
-                    </select>
-
                     <label className="block mb-2">Doctors:</label>
                     <select
                         className={sharedClasses.input}
@@ -71,18 +64,10 @@ const PatientAppointments = () => {
                         onChange={(e) => setDoctor(e.target.value)}
                     >
                         <option value="">Select Doctor</option>
-                        {doctors.map(doc => (
+                        {doctors.map((doc) => (
                             <option key={doc._id} value={doc._id}>{doc.name}</option>
                         ))}
                     </select>
-
-                    <label className="block mb-2">Consultancy Fees</label>
-                    <input
-                        type="text"
-                        value={fees}
-                        onChange={(e) => setFees(e.target.value)}
-                        className={sharedClasses.input}
-                    />
 
                     <label className="block mb-2">Date</label>
                     <input

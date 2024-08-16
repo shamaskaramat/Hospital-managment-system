@@ -17,7 +17,8 @@ const patientSchema = new mongoose.Schema({
         canCreateAppointments: { type: Boolean, default: true },
         canViewOwnAppointments: { type: Boolean, default: true },
         canSendMessagesToAdmin: { type: Boolean, default: true },
-        canViewDepartments: { type: Boolean, default: true },
+        canViewDoctors: { type: Boolean, default: true },
+        // canViewDepartments: { type: Boolean, default: true },
 
     },
     otp: { type: String },

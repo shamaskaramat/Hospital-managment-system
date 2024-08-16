@@ -3,6 +3,7 @@ import {
     createDoctor,
     deleteDoctor,
     getAllDoctors,
+    getDoctorAppointments,
     loginDoctor,
     updateDoctor,
 } from '../controllers/doctor.controller.js';
@@ -13,6 +14,7 @@ import upload from '../upload/multerConfig.js';
 const router = express.Router();
 //public route for doctor
 router.post('/login', loginDoctor);
+router.get('/getallappointment', authenticate, authorize(['canViewOwnAppointments', 'canViewDepartment']), getDoctorAppointments);
 
 // router.use(authenticate);
 

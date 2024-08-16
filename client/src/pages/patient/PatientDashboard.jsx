@@ -1,70 +1,70 @@
 import React from 'react'
-import { FaUserMd, FaUserInjured, FaCalendarAlt, FaUserPlus, FaEnvelope, FaSignOutAlt } from 'react-icons/fa'
-import { MdDashboard } from 'react-icons/md'
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { FaUserMd, FaUserInjured, FaCalendarAlt, FaEnvelope, FaSignOutAlt } from 'react-icons/fa'
+import { MdDashboard, MdOutlineSettings } from 'react-icons/md'
+import { FaMessage } from "react-icons/fa6"
+import { Link, Outlet, useNavigate } from 'react-router-dom'
+import Cookies from 'js-cookie'
+import { toast } from 'react-toastify'
 
-import { MdOutlineSettings } from "react-icons/md";
-import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
-const sidebarClasses = 'bg-blue-700 text-white w-64 p-6 space-y-6'
-const linkClasses = 'flex items-center space-x-2 py-2 px-4 rounded hover:bg-blue-600 transition-colors duration-200'
-
+const sidebarClasses = 'bg-white text-gray-800 h-screen w-64 p-4 space-y-4 shadow-xl transition-all duration-300'
+const linkClasses = 'flex items-center py-3 px-4 rounded-lg transition-all duration-300 '
 
 const Sidebar = () => {
     const navigate = useNavigate()
+
     const handleLogout = () => {
-        Cookies.remove('authToken');
-        navigate('/login');
-        toast.success('Logged out successfully!');
-    };
+        Cookies.remove('authToken')
+        navigate('/')
+        toast.success('Logged out successfully!')
+    }
+
+    const isActive = (path) => window.location.pathname === path
+
+    const NavLink = ({ to, icon: Icon, children }) => (
+        <Link
+            to={to}
+            className={`${linkClasses} ${isActive(to) ? 'bg-blue-500 text-white shadow-lg' : 'text-gray-600 hover:bg-blue-100'}`}
+        >
+            <Icon className={`text-xl ${isActive(to) ? 'text-white' : 'text-blue-500'}`} />
+            <span className="ml-3">{children}</span>
+        </Link>
+    )
+
     return (
         <aside className={sidebarClasses}>
-            <h1 className="text-2xl font-bold mb-8">Services Hospital</h1>
-            <nav>
-                <h4 className="text-lg font-semibold mb-4 flex items-center">
-                    <Link to="" className={linkClasses}>
-
-                        <MdDashboard className="mr-2" />
-                        Dashboard
-                    </Link>
-                </h4>
-                <ul className="space-y-2">
-                    <li>
-                        <Link to="/patient/create-appointments" className={linkClasses}>
-                            <FaUserMd />
-                            <span>Appointment</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/patient/appointments-history" className={linkClasses}>
-                            <FaUserInjured />
-                            <span> History</span>
-                        </Link>
-                    </li>
-
-                </ul>
+            <div className="flex items-center justify-between p-4 border-b ">
+                <h1 className="text-xl font-bold text-blue-600">Services Hospital</h1>
+            </div>
+            <nav className="p-4 space-y-2">
+                <NavLink to="/patient" icon={FaUserMd}>Dashboard</NavLink>
+                <NavLink to="/patient/create-appointments" icon={FaUserMd}>Appointment</NavLink>
+                <NavLink to="/patient/appointments-history" icon={FaUserInjured}>History</NavLink>
+                <NavLink to="/patient/messages" icon={FaMessage}>Feedback</NavLink>
             </nav>
-            <div className="border-t border-white my-6 w-full"></div>
-            <button className={`${linkClasses} mt-auto`}>
-                <MdOutlineSettings />
-                <span>settings</span>
-            </button>
-            <button className={`${linkClasses} mt-auto`} onClick={handleLogout}>
-                <FaSignOutAlt />
-                <span>Logout</span>
-            </button>
-
+            <div className="absolute bottom-0  p-4 border-t">
+                <button className={`${linkClasses} text-gray-600 hover:bg-blue-100`}>
+                    <MdOutlineSettings className="text-xl text-blue-500 inline" />
+                    <span className="ml-3">Settings</span>
+                </button>
+                <button
+                    className={`${linkClasses} text-gray-600 hover:bg-blue-100`}
+                    onClick={handleLogout}
+                >
+                    <FaSignOutAlt className="text-xl text-blue-500 inline" />
+                    <span className="ml-3">Logout</span>
+                </button>
+            </div>
         </aside>
     )
 }
 
-
-
 const PatientDashboard = () => {
     return (
-        <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+        <div className="flex bg-gray-100 min-h-screen">
             <Sidebar />
-            <Outlet />
+            <main className="flex-grow p-8 overflow-auto">
+                <Outlet />
+            </main>
         </div>
     )
 }

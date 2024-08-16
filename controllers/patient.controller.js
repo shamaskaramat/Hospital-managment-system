@@ -211,7 +211,7 @@ export const sendMessage = async (req, res) => {
         const { message } = req.body;
         const senderId = req.user.id;
 
-        const email = req.user.email;
+        // const email = req.user.email;
         // console.log(senderId, email)
 
 
@@ -230,14 +230,14 @@ export const sendMessage = async (req, res) => {
             sender: senderId,
             receiver: receiverId,
             message,
-            email
+            // email
         });
 
         await newMessage.save();
 
         // Optionally, you can update the patient and admin documents to include the new message reference
 
-        res.status(201).json({ message: 'Message sent successfully', newMessage });
+        res.status(201).json({ success: true, message: 'Message sent successfully', newMessage });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });

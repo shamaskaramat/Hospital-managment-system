@@ -1,5 +1,4 @@
-// src/redux/Actions/AppointmentActions.js
-
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import {
@@ -9,6 +8,9 @@ import {
     GET_APPOINTMENT_BY_ID_REQUEST,
     GET_APPOINTMENT_BY_ID_SUCCESS,
     GET_APPOINTMENT_BY_ID_FAILURE,
+    GET_ALL_APPOINTMENTS_REQUEST,
+    GET_ALL_APPOINTMENTS_SUCCESS,
+    GET_ALL_APPOINTMENTS_FAILURE,
 } from '../Constants/AppointmentConstant';
 
 const getAuthToken = () => {
@@ -33,16 +35,35 @@ export const createAppointment = (appointmentData) => async (dispatch) => {
 };
 
 // Get Appointment by ID
-export const getAppointmentById = async (dispatch) => {
+export const getAppointmentById = () => async (dispatch) => {
     dispatch({ type: GET_APPOINTMENT_BY_ID_REQUEST });
 
     try {
         const token = getAuthToken();
-        const response = await axios.get(`localhost:8000/api/appointment/patient-appointments`, {
+        const response = await axios.get(`http://localhost:8000/api/appointment/patient-appointments`, {
             headers: { Authorization: `Bearer ${token}` }
         });
+        console.log(response)
         dispatch({ type: GET_APPOINTMENT_BY_ID_SUCCESS, payload: response.data });
     } catch (error) {
         dispatch({ type: GET_APPOINTMENT_BY_ID_FAILURE, payload: error.response?.data?.message || error.message });
+    }
+};
+
+
+
+// Fetch All Appointments
+export const fetchAllAppointments = () => async (dispatch) => {
+    dispatch({ type: GET_ALL_APPOINTMENTS_REQUEST });
+
+    try {
+        const token = getAuthToken();
+        const response = await axios.get(`http://localhost:8000/api/appointment/appointments-details`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        dispatch({ type: GET_ALL_APPOINTMENTS_SUCCESS, payload: response.data.data });
+    } catch (error) {
+        dispatch({ type: GET_ALL_APPOINTMENTS_FAILURE, payload: error.response?.data?.message || error.message });
+        toast.error('Failed to fetch appointments');
     }
 };
